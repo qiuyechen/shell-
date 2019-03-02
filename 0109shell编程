@@ -1,0 +1,494 @@
+命令总结
+hostname
+who
+whoami
+who am i
+pwd
+ls
+cd
+mkdir
+mv
+cp
+rm -r
+rmdir
+touch
+echo
+cat
+less
+more
+head
+tail
+vi
+tar
+gzip
+du -sh
+adduser
+usermod
+deluser
+passwd
+chmod
+chown
+grep
+find
+locate
+top
+ps -ef
+netstat
+free -m
+ifconfig
+man
+info
+kill
+ping
+vmstat
+nslookup
+ssh
+scp
+mount
+df -h
+================================================================================
+1.shell编程
+1>shell脚本
+需要执行的命令存储在文件中，执行
+每晚9:30拷贝data目录下所有文件打包压缩到指定服务器中
+shell脚本=若干命令+脚本基本格式+特定语法
+2>什么时候使用脚本
+重复、复杂工作通过命令写成脚本，通过脚本完成任务
+3>shell学习技巧
+a.记命令
+b.掌握标准格式
+c.掌握基本语法
+	变量定义
+	条件判断
+	循环
+	函数
+	传参
+	sed
+	awk
+4.脚本执行(脚本以.sh结尾)
+a.通过绝对路径执行
+通过绝对路径执行脚本，该文件必须有执行权限才能执行
+修改文件权限
+chmod a+x 01.sh
+/home/heygor/shell/01.sh
+b.通过相对路径执行
+通过相对路径执行脚本文件也需要有执行权限
+chmod a+x02.sh
+./02.sh
+c.通过bash执行
+通过bash执行不需要提前设置文件权限，直接使用就可以
+bash 03.sh
+5.变量的定义和使用
+变量名字和值都是自定义，用户可以进行控制和更改
+a1.命名规则
+	变量名可以有数字、字母、下划线，必须以字母或者下划线开头
+	变量名长度不能超过255
+	变量名在有效范围内必须唯一
+a2.变量的存储类型
+	字符串类型
+	整型
+	浮点型
+	日期型
+a3.变量的定义
+	变量名=变量值
+	注意:等号左右不能有空号
+	a=20
+	b=30
+a4.变量的调用
+	a=200
+	echo $a
+	a=300
+	echo $a
+a5.变量的查看
+可以查询当前系统运行的所有变量包括系统变量和用户变量
+	set
+a6.变量的删除
+	unset namea
+注意:unset不是删除变量里的值，而是删除变量，变量名前面不需要加$
+补充:
+a.系统变量
+	用于定义shell的运行环境，环境变量可以在配置文件中进行定义和修改，也可以在命令中设置，配置文件/etc/profile、.bashrc
+b.用户变量(本地变量)
+在当前shell脚本中使用
+
+6.变量的赋值
+	1.直接赋值
+	a=100
+	a='no.1'
+	2.间接赋值
+	``反斜线代表先执行斜线中的命令，然后把执行结果赋予变量
+	name=`hostname`
+	echo $name
+	3.交互式赋值
+	read -p "请输入您的名字：" name
+	echo $name
+7.变量的位置参数进行赋值
+	通常脚本后面跟的第一个参数叫$,第二个参数$2...
+	#06.sh
+	findpath="$1"
+	find $findpath -name 06.sh
+	执行./06.sh /home/heygor/shell
+	#07.sh
+	echo "第一个参数是$1"
+	echo "第二个参数是$2"
+	执行./07.sh 119 'simida'
+
+8.变量的运算
+	a.通过let的方式
+	a=100
+	b=30
+	let c=a+b
+	echo $c
+	b.通过$()方式
+	a=20
+	b=30
+	c=$((a+b))
+	echo $c
+	c.通过``方式
+	#08.sh
+	now=`date | awk -F "" '{print $5}'
+	echo $now
+9.判断条件
+	shell编程中有test命令，通过man test查看判断语法
+	条件判断在脚本中以if关键字开头fi关键字结尾，test等价于[]
+	a.单分支
+	if[ 条件 ];then
+		执行语句
+	fi
+	#09.sh
+	read -p "input your name!" name
+	echo $name
+
+
+	if [ $name = "heygor" ];then
+        	echo "handsome!!"
+	fi
+	b.双分支
+	if [ 判断条件 ];then
+		执行语句
+	else	执行语句
+	fi
+	#10.sh
+	#!/bin/bash
+	read -p "请输入你的法号：" name
+	if [ $name = "dachui" ];then
+        	echo "高富帅嫁给我"
+	else
+        	echo "洗洗睡吧"
+	fi
+	c.多分支
+	if [ 条件 ];then
+		执行语句
+	elif [ 条件 ];then
+	...
+	else	
+		执行语句
+	fi
+	d.条件判断常见参数
+		-f 是否存在(文件)
+			如果条件成立，返回$?=0
+		-e 不管文件还是目录存在条件就成立
+		-n 字符串为空就是成立
+		-z 字符串长度为0
+		字符串的对比 = !=不能用于数值大小的判断
+		-eq	等于
+		-ne	不等于
+		-lt	小于
+		-lte	小于等于
+		-gt	大于
+		-gte	大于等于
+		逻辑判断
+		-a	and同时满足条件
+		-o	or满足一个条件即可
+		#11.sh
+                #!/bin/bash
+		if [ -f /etc/passwd ];then
+        		echo "file exists"
+		else
+        		echo "where a u?"
+		fi
+
+		#12.sh
+		ls /etc/passwd123
+		if [ $? eq 0 ];then
+        		echo "命令执行没问题"
+		else
+        		echo "WTF"
+		fi
+		补充:
+		重定向
+			>	覆盖
+			>>	追加
+			&>	所有信息写入
+			1>	正确信息写入
+			2>	错误信息写入
+		/dev/null 简单理解为回收站
+10.循环
+	a.for循环
+	for循环就是遍历，访问序列中每一个元素
+	for i in 1 2 3 4
+	do
+		echo "no.$1"
+	done
+
+
+	for i in seq 10
+	do
+		sudo useradd user$1
+	done
+	echo "finished"
+
+
+
+	for ((i=1;i<10;i++))
+	do
+		echo $i
+	done
+	问题:判断局域网中哪些IP可以使用，哪些不能用
+	b.while循环	
+	do
+		执行语句
+	done
+	runum=$(($RANDOM))
+	echo $runum
+	guest=0
+	while [ "$guest" -ne "$runum" ]
+	do
+		read -p "guest num:" guest
+	done
+	问题:每次提示输入的数字是大啦还是小啦
+================================================================================
+awk
+文本的行处理工具
+awk options 文件
+ifconfig |grep inet |grep -v inet6|grep -v 127.0.0.1|awk -F" " '{print $2}'|awk -F ":" '{print $2}'
+查看IP地址
+awk -F ":" '{print $1}' /etc/passwd	打印文件的第一列
+awk -F ":" '{print $1,$6}' /etc/passwd  打印文件的第一列和第六列
+awk -F ":" '{print $1":"$6}' /etc/passwd打印文件的第一列和第六列，中间用冒号$1,$2....$N表示第几列
+$0代表一整行
+awk -F ":" '{print $0}' /etc/passwd
+$NF表示最后一列
+awk -F ":" '{print $NF}' /etc/passwd
+NF每行有多少列
+head -3 /etc/passwd | awk -F ":" '{print NF}'
+NR当前行号
+head -5 /etc/passwd |awk -F ":" '{print NR,$1}'
+
+awk的关系操作符
+	==	等于
+	!=	不等于
+	>=	大于等于
+	<=	小于等于
+	>	大于
+	<	小于
+awk的逻辑操作符
+	&&	逻辑与
+	||	逻辑或
+	!	逻辑非
+	awk -F ":" 'NR==8{print $0}' /etc/passwd打印文件的第8行
+	awk -F ":" 'NF<4{print $0}' passwd打印字段数量小于4的行
+	awk -F ":" 'NR>=5&&NR<10{print NR,$0}' passwd打印5-10行数据
+	awk -F ":" '$3>30&&$3<=100{print $1,$3}' /etc/passwd 打印第三列大于30并且小于等于100的行的数据
+	awk -F ":" '$3>=30&&$3<=100{pritn $1,$3}' /etc/passwd打印第三列大于等于30并且小于等于100的行的数据
+	awk -F "分隔符" 'BEGIN{处理文件前执行的代码}{处理过程中执行的代码}END{处理后执行的代码}'
+	输出顶部增加heygor do this
+	输出底部增加finished
+	awk -F ":" 'BEGIN{print "heygor do this"}{print $0}END{print "finished"}' passwd
+	需求
+	打印字段数量大于4的总行数量
+	补充:wc -l	统计、计算
+	awk -F ":" 'NF>4{print $0}' /etc/passwd |wc -l
+	awk -F ":" 'BEGIN{ count=o }NF>4{ count++}END{ print count }' /etc/passwd
+
+	把AWK代码写入独立文件
+	文件test
+	BEGIN{
+		FS=":"
+		count=0
+	}
+	{
+		if(NF>4){
+			count++
+	}
+	}
+	END{
+		print count
+	}
+	~
+	执行时候
+	awk -f test /etc/passwd
+	
+
+	sed
+	字段编辑和字段替换
+	删除指令	d	在查看时候屏蔽某些信息
+	删除所有行	sed -e 'd' passwd
+	删除第一行	sed -e '1d' passwd
+	删除1到3	sed -e '1,3d' passwd
+	删除1,3行	sed -e '1d;3d' passwd
+	删除包含root关键字的行	sed -e '/root/d' passwd
+	删除以daemon开头的行	sed -e '/^daemon/d' passwd
+	删除以bash结尾的行	sed -e '/bash$/d' passwd
+	删除以bash结尾的行      sed -e '/bash$/d' passwd
+	删除所有空行            sed -e '/^$/d' passwd 
+	删除所有以#开头的行     sed -e '/^#/d' passwd
+
+
+	
+	打印所有行         sed -n -e 'p' passwd 
+	打印第一行和第三行 sed -n -e '1p;3p' passwd
+	打印以管理员开头的行 sed -n -e '/^root/p' passwd
+
+	替换命令，显示、打印时候替换
+	搜索每行第一个root关键字为admin   sed -e 's/root/admin/' passwd 
+	替换每行的n为admin		  sed -e 's/n/admin/g' passwd 
+	替换2-10行的：为-		  sed -e '2,10s/:/-/g' passwd 
+
+	把结果保存到源文件 		  sed -i '/^root/d' passwd 
+
+	使用域进行定位
+	echo "2019-01-09" |awk -F "-" '{print $2"-"$3"-"$1}'
+	echo "2019-01-09" |sed -r 's/(....)-(..)-(..)/\2-\3-\1/'
+	echo "come on,baby"|sed -r 's/(.*),(.*)/\2,\1/'
+	删除每行第二个字符
+	cat passwd |sed -r 's/(.)(.)(.*)/\1\3/'
+	删除每行最后一个字符
+	echo "can you see me?"|sed -
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+~   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+                 
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
